@@ -1,9 +1,9 @@
-weekend_budget = [25, 30, 15, 10, 20, 4, 45]
+money = input("Введите сумму в рублях: ").lower().strip()
 
-total = sum(weekend_budget)
-minimum = min(weekend_budget)
-maximum = max(weekend_budget)
-average = total / len(weekend_budget)
+rubles = money.split("руб")[0].strip()
+kopecks = money.split("руб")[1].strip().split("коп")[0].strip()
 
-save = (minimum, maximum, total)
-print(save)
+if not rubles.isdigit() or (kopecks and not kopecks.isdigit()):
+    print("Некорректный формат суммы")
+else:
+    print(f"{rubles}.{kopecks.zfill(2)} ₽")
