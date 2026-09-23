@@ -42,11 +42,23 @@ while True:
     for option in MENU:
         print(option + "\n")
     
-    user_input = int(input("Введите номер меню: "))
+    user_input = input("Введите номер меню: ")
     
     match user_input:
-        case 4:
-            print("Вы покинули программу!")
+        case "1":
+            print()
+            continue
+        case "2":
+            print()
+            continue
+        case "3":
+            print()
+            continue
+        case "4":
+            print()
+            continue
+        case "5":
+            print("\nВы покинули программу!")
             break
         case _:
-            break
+            print("\nТакого пункта нет, попробуйте ещё раз!\n")
