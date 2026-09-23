@@ -1,9 +1,9 @@
 weekend_budget = [25, 30, 15, 10, 20, 4, 45]
 
-sum = sum(weekend_budget)
-min = min(weekend_budget)
-max = max(weekend_budget)
-average = sum / len(weekend_budget)
+total = sum(weekend_budget)
+minimum = min(weekend_budget)
+maximum = max(weekend_budget)
+average = total / len(weekend_budget)
 
-save = (min, max, sum)
+save = (minimum, maximum, total)
 print(save)
