@@ -2,3 +2,4 @@
 rsp/main.py
 .gitignore
 rsp/rsp.py
+.pylintrc

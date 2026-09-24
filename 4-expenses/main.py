@@ -1,36 +1,57 @@
-# money = input("Введите сумму в рублях: ").lower().split()
+expences: list[float] = []
 
-# rub_list = ["руб", "рубль", "рубля", "рублей"]
-# kop_list = ["коп", "копейка", "копейки", "копеек"]
+total = 0
+average = 0
 
-# if len(money) == 2:
-#     if money[0].isdigit() and money[1] in rub_list:
-#         rubles = int(money[0])
-#         print(f"{rubles}.00 ₽")
-#     else:
-#         print("Некорректный формат суммы")
+RUB_LIST = ["руб", "рубль", "рубля", "рублей"]
+KOP_LIST = ["коп", "копейка", "копейки", "копеек"]
 
-# elif len(money) == 4:
-#     if (money[0].isdigit()
-#             and money[1] in rub_list
-#             and money[2].isdigit()
-#             and money[3] in kop_list):
 
-#         rubles = int(money[0])
-#         kopecks = int(money[2])
+def add_expense(exp: list[float], value: float) -> list[float]:
+    exp.append(value)
+    return exp
 
-#         if kopecks <= 99:
-#             print(f"{rubles}.{kopecks:02d} ₽")
-#         else:
-#             print("Некорректный формат суммы")
 
-#     else:
-#         print("Некорректный формат суммы")
+def delete_expence(exp: list[float], idx: int):
+    exp.pop(idx)
 
-# else:
-#     print("Некорректный формат суммы")
 
-# Menu
+def get_total(exp: list[float]):
+    return sum(exp)
+
+
+def get_average(exp: list[float]):
+    return sum(exp) / len(exp)
+
+
+def print_report(exp: list[float]):
+
+    print("=" * 30)
+    print(f"Все ваши расходы : {exp}\n")
+    print("=" * 30)
+
+
+def parse_expences(input_user: str):
+    money = input_user.lower().split()
+
+    if len(money) == 2:
+        if money[0].isdigit() and money[1] in RUB_LIST:
+            return int(money[0])
+
+    elif len(money) == 4:
+        if (money[0].isdigit()
+                and money[1] in RUB_LIST
+                and money[2].isdigit()
+                and money[3] in KOP_LIST
+                and int(money[2]) <= 99):
+
+            return f"{int(money[0])}.{int(money[2]):02d} "
+
+    print("Некорректный формат суммы")
+    return ""
+
+
+    # Menu
 MENU = (
     "1. Добавить расход",
     "2. Показать все расходы",
@@ -38,25 +59,30 @@ MENU = (
     "4. Удалить расход по номеру",
     "5. Выход"
 )
+
+
 while True:
     for option in MENU:
         print(option + "\n")
-    
+
     user_input = input("Введите номер меню: ")
-    
+
     match user_input:
         case "1":
-            print()
-            continue
+            user_money = input("\nВведите сумму в рублях: ")
+            parse_user_money = float(parse_expences(user_money))
+            print(parse_expences)
+            add_expense(expences, parse_user_money)
         case "2":
-            print()
-            continue
+            print_report(expences)
         case "3":
-            print()
-            continue
+            total = get_total(expences)
+            average = get_average(expences)
+            print(f"\nВаша сумма рассходов: {total}\n")
+            print(f"Ваш средний рассход: {average}\n")
         case "4":
-            print()
-            continue
+            index = int(input("\nВведите индекс элемента (от 0): "))
+            delete_expence(expences, index)
         case "5":
             print("\nВы покинули программу!")
             break
