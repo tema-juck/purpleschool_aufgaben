@@ -1,19 +1,9 @@
-books: dict[str, tuple[str, ...]] = {}
+books: dict[str, str] = {}
 
-books["Стивен Кинг"] = ("Оно", "Оно 2")
-books["Гоголь"] = ("Мертвые души",)
+books["Оно"] = "Стивен кинг"
+books["Оно 2"] = "Стивен кинг"
+books["Мертвые души"] = "Гоголь"
 
-all_books = []
+print(list(books.keys()))
 
-for value in books.values():
-    all_books.append(value) # type: ignore
-
-print(all_books) # type: ignore
-
-unique_autors: set[str] = set()
-
-for key in books:
-    unique_autors.add(key)
-
-
-print(unique_autors)
+print(set(books.values()))
