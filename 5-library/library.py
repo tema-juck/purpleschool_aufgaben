@@ -17,7 +17,7 @@ if action[1] == "filter":
 if action[1] == "sort":
     if action[2] == "author":
         fillterd = sorted(books.items(), key=lambda book: book[1])
-        mapped = map(lambda book: f"{book[1]} - {book[0]}", fillterd)
+        mapped = map(lambda book: f"{book[0]} - {book[1]}", fillterd)
         print(*mapped, sep="\n")
 
     if action[2] == "book":
