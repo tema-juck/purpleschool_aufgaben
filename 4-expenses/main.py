@@ -71,7 +71,6 @@ while True:
         case "1":
             user_money = input("\nВведите сумму в рублях: ")
             parse_user_money = float(parse_expences(user_money))
-            print(parse_expences)
             add_expense(expences, parse_user_money)
         case "2":
             print_report(expences)
