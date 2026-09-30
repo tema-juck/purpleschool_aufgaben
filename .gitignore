@@ -3,3 +3,5 @@ rsp/main.py
 .gitignore
 rsp/rsp.py
 .pylintrc
+file.py
+tracker/main.py
