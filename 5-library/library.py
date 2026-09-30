@@ -63,7 +63,7 @@ try:
                 sorted_books
             )
 
-        elif action[2] == "book":
+        else:
             sorted_books = sorted(books.keys())
 
             mapped = map(
