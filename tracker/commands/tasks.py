@@ -1,6 +1,7 @@
 """"Task Module"""
 
-from typing import TypedDict
+from datetime import date
+from typing import TypedDict, Optional
 
 PRIORITIES = {"low", "med", "high"}
 
@@ -9,12 +10,15 @@ class Task(TypedDict):
     id: int
     title: str
     priority: str
-    tags: list[str]
+    tags: Optional[list[str]]
     status: str
+    due: Optional[date]
 
 
 # make_task()
-def make_task(id_: int, title: str, priority: str = "med", tags: list[str] | None = None) -> Task:
+def make_task(
+        id_: int, title: str, priority: str = "med",
+        tags: Optional[list[str]] = None, due: Optional[date] = None) -> Task:
     if priority not in PRIORITIES:
         raise ValueError(f"Invalid priority: {priority}")
 
@@ -23,7 +27,8 @@ def make_task(id_: int, title: str, priority: str = "med", tags: list[str] | Non
         "title": title.strip(),
         "priority": priority,
         "status": "new",
-        "tags": [] if tags is None else tags
+        "tags": tags,
+        "due": due
     }
 
     return task
