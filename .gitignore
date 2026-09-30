@@ -4,4 +4,3 @@ rsp/main.py
 rsp/rsp.py
 .pylintrc
 file.py
-tracker/main.py
