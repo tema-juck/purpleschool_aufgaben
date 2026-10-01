@@ -15,7 +15,6 @@ class Task(TypedDict):
     due: Optional[date]
 
 
-# make_task()
 def make_task(
         id_: int, title: str, priority: str = "med",
         tags: Optional[list[str]] = None, due: Optional[date] = None) -> Task:

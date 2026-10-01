@@ -60,16 +60,6 @@ def edit_order(
 
     for order in order_list:
         if order["id"] == id_:
-
-            if title is not None:
-                order["title"] = title.strip()
-
-            if amount is not None:
-                order["amount"] = amount
-
-            if email is not None:
-                order["email"] = email
-
             if status is not None:
                 if status not in STATUS:
                     print("Некорректный статус")
@@ -79,6 +69,15 @@ def edit_order(
 
                 if status in ("done", "cancelled"):
                     order["closed_at"] = datetime.now()
+
+            if title is not None:
+                order["title"] = title.strip()
+
+            if amount is not None:
+                order["amount"] = amount
+
+            if email is not None:
+                order["email"] = email
 
             if tags is not None:
                 order["tags"] = tags
