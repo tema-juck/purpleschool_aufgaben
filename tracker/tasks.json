@@ -1,3 +1,14 @@
 {
-  "tasks": []
+  "tasks": [
+    {
+      "id": 1,
+      "title": "LOW",
+      "priority": "high",
+      "status": "new",
+      "tags": [
+        "low"
+      ],
+      "due": null
+    }
+  ]
 }

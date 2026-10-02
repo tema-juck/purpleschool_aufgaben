@@ -1,8 +1,10 @@
 from shlex import split
+from commands.edit import edit_command
 from commands.help import help_command
 from commands.add import add_command
 from commands.list import list_command
 from commands.remove import remove_command
+from commands.tags import tag_command
 from storage.file import load_tasks, save_tasks
 
 
@@ -25,9 +27,9 @@ def main():
                 case "remove":
                     remove_command(tasks, args)
                 case "edit":
-                    pass
+                    edit_command(tasks, args)
                 case "tags":
-                    pass
+                    tag_command(tasks, args)
                 case "exit":
                     save_tasks(tasks, file_path)
                     break
