@@ -4,7 +4,7 @@
       "id": 1,
       "title": "LOW",
       "priority": "high",
-      "status": "new",
+      "status": "done",
       "tags": [
         "low"
       ],

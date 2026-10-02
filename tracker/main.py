@@ -1,4 +1,5 @@
 from shlex import split
+from commands.done import done_command
 from commands.edit import edit_command
 from commands.help import help_command
 from commands.add import add_command
@@ -30,6 +31,8 @@ def main():
                     edit_command(tasks, args)
                 case "tags":
                     tag_command(tasks, args)
+                case "done":
+                    done_command(tasks, args)
                 case "exit":
                     save_tasks(tasks, file_path)
                     break
