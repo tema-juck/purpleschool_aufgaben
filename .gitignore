@@ -4,3 +4,4 @@ rsp/main.py
 rsp/rsp.py
 .pylintrc
 file.py
+__pycache__
