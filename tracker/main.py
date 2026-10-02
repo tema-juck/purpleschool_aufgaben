@@ -1,6 +1,11 @@
 from shlex import split
+from commands.done import done_command
+from commands.edit import edit_command
 from commands.help import help_command
 from commands.add import add_command
+from commands.list import list_command
+from commands.remove import remove_command
+from commands.tags import tag_command
 from storage.file import load_tasks, save_tasks
 
 
@@ -19,13 +24,15 @@ def main():
                 case "add":
                     next_id = add_command(tasks, args, next_id)
                 case "list":
-                    pass
+                    list_command(tasks, args)
                 case "remove":
-                    pass
+                    remove_command(tasks, args)
                 case "edit":
-                    pass
+                    edit_command(tasks, args)
                 case "tags":
-                    pass
+                    tag_command(tasks, args)
+                case "done":
+                    done_command(tasks, args)
                 case "exit":
                     save_tasks(tasks, file_path)
                     break
@@ -41,33 +48,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # r - read
-    # w - write
-    # a - append
-    # x - make new file
-    # b - binary file
-    # t - text file
-    # + - open to write/read
-    # with open("notes.txt", "w", encoding="utf-8") as file:
-    #     file.write("HI\n")
-
-    # res = json.dumps(
-    #     {
-    #         "a": True,
-    #         "b": [1, 2, 3]
-    #     }
-    # )
-
-    # with open("tasks.json", "w", encoding="utf-8") as file:
-    #     json.dump({
-    #         "id": 1, "title": "Task 1"
-    #     }, file, ensure_ascii=False, indent=2)
-
-    # with open("tasks.txt", "r", encoding="utf-8") as f:
-    #     for line in f:
-    #         print(">", line.strip())
-
-    # with open("tasks.json", "r", encoding="utf-8") as f:
-    #     data = json.load(f)
-    #     print(data)
     main()

@@ -4,6 +4,41 @@
 from datetime import date, datetime
 
 
+def parse_list(args: list[str]):
+    by = None
+    for arg in args:
+        if arg.startswith("by="):
+            by = arg.split("=", 1)[1]
+    return by
+
+
+def parse_edit(args: list[str]) -> tuple:
+    if len(args) < 2:
+        raise ValueError("Not enough args!")
+    task_id = 0
+    try:
+        task_id = int(args[0])
+    except ValueError as e:
+        raise ValueError("Failed 'id' Task!") from e
+
+    changes = {}
+
+    for arg in args[1:]:
+        if arg.startswith("title="):
+            changes["title"] = arg.split("=", 1)[1]
+        if arg.startswith("prio="):
+            changes["prio"] = arg.split("=", 1)[1]
+        elif arg.startswith("due="):
+            due_str = arg.split("=", 1)[1]
+            try:
+                changes["due"] = parse_date(due_str)
+            except ValueError as e:
+                raise ValueError(
+                    f"Неверный формат даты {due_str}. Ожидали [due=YYYY-MM-DD]"
+                ) from e
+    return (task_id, changes)
+
+
 def parse_add(args: list[str]):
     if not args:
         raise ValueError(
