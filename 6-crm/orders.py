@@ -1,8 +1,11 @@
 """Модуль заказов и бизнес логика"""
 
 
-from datetime import datetime
-from typing import TypedDict
+from datetime import date, datetime
+from typing import Optional, TypedDict
+
+from utils.table import srtingify_table
+from utils.validators import parse_list, parse_add, validate_email
 
 STATUS = {"new", "in_progress", "done", "cancelled"}
 
@@ -13,15 +16,15 @@ class Order(TypedDict):
     amount: float
     email: str
     status: str
-    tags: set[str]
+    tags: Optional[set[str]]
     created_at: datetime
-    due: datetime | None
+    due: date | None
     closed_at: datetime | None
 
 
 def create_order(id_: int, title: str, amount: float, email: str,
-                 tags: set[str], due: str | None) -> Order:
-    due_datetime = datetime.fromisoformat(due) if due is not None else None
+                 tags: set[str] | None, due: str | None) -> Order:
+    due_datetime = date.fromisoformat(due) if due is not None else None
     new_order: Order = {
         "id": id_,
         "title": title.strip(),
@@ -29,71 +32,124 @@ def create_order(id_: int, title: str, amount: float, email: str,
         "email": email,
         "status": "new",
         "tags": tags,
-        "created_at": datetime.now(),
+        "created_at": datetime.today(),
         "due": due_datetime,
         "closed_at": None
     }
     return new_order
 
 
-def list_orders(order_list: list[Order]):
-    for order_item in order_list:
-        for key, value in order_item.items():
-            if isinstance(value, datetime):
-                value = value.strftime("%d.%m.%Y %H:%M")
+def list_orders(orders: list[Order], args: list[str]):
+    subset = orders[:]
+    params = parse_list(args)
 
-            print(f"{key}: {value}")
+    if params["overdue"]:
+        subset = [
+            order
+            for order in subset
+            if order["due"] is not None
+        ]
 
-        print()
+        subset = sorted(subset, key=lambda order: order["due"] or date.max)
 
+    if params["tag"] is not None:
+        subset = [
+            order
+            for order in subset
+            if params["tag"] in order["tags"]
+        ]
 
-def edit_order(
-    id_: int,
-    order_list: list[Order],
-    title: str | None = None,
-    amount: float | None = None,
-    email: str | None = None,
-    status: str | None = None,
-    tags: set[str] | None = None,
-    due: str | None = None
-) -> None:
+    if params["limit"] is not None:
+        subset = subset[:params["limit"]]
 
-    for order in order_list:
-        if order["id"] == id_:
-            if status is not None:
-                if status not in STATUS:
-                    print("Некорректный статус")
-                    return
+    if not subset:
+        print("Список пустой!")
+        return
 
-                order["status"] = status
-
-                if status in ("done", "cancelled"):
-                    order["closed_at"] = datetime.now()
-
-            if title is not None:
-                order["title"] = title.strip()
-
-            if amount is not None:
-                order["amount"] = amount
-
-            if email is not None:
-                order["email"] = email
-
-            if tags is not None:
-                order["tags"] = tags
-
-            if due is not None:
-                order["due"] = datetime.fromisoformat(due)
-
-            return
-
-    print("Заказ не найден")
+    print(srtingify_table(subset))
 
 
-def remove_order(id_: int, order_list: list[Order]) -> None:
-    for order_item in order_list:
-        if order_item["id"] == id_:
-            order_list.remove(order_item)
-            return
+def add_order(orders: list[Order], args: list[str], next_id: int) -> int:
+    try:
+        title, amount, email, due, tags = parse_add(args)
+        if not isinstance(amount, str):
+            raise ValueError("Сумма должна быть строкой")
+        if not isinstance(email, str):
+            raise ValueError("Email должен быть строкой")
+        if not validate_email(email):
+            raise ValueError("Некорректный email")
+        if tags is not None:
+            tags = set(tags)
+        order = create_order(
+            next_id,
+            title,
+            float(amount),
+            email,
+            tags,
+            due.isoformat() if due is not None else None,
+        )
+        orders.append(order)
+        print("Добавлена задача")
+        print(srtingify_table([order]))
+        return next_id + 1
+    except ValueError as e:
+        print(f"ERROR: {e}")
+        return next_id
 
-    print("Заказ не найден")
+
+def remove_order(orders: list[Order], order_id) -> bool:
+    before_len = len(orders)
+    orders[:] = list(filter(lambda o: o["id"] != order_id, orders))
+    return len(orders) < before_len
+
+
+def update_order(order: Order, **changes):
+    if "title" in changes:
+        title = str(changes["title"]).strip()
+        if not title:
+            raise ValueError("Title can't be empty!")
+        order["title"] = title
+
+    if "amount" in changes:
+        amount = str(changes["amount"]).strip()
+        if not amount:
+            raise ValueError("Amount can't be empty!")
+        order["amount"] = float(amount)
+
+    if "email" in changes:
+        email = str(changes["email"]).strip()
+        if not email:
+            raise ValueError("Email can't be empty!")
+        order["email"] = email
+
+    if "due" in changes:
+        due = changes["due"]
+        if due is not None and not isinstance(due, date):
+            raise TypeError("Field 'due' must be date or None!")
+        order["due"] = due
+
+
+def find_order(orders: list[Order], id_: int) -> Optional[Order]:
+    return next((o for o in orders if o["id"] == id_), None)
+
+
+def change_status(orders: list[Order], args: list[str]):
+    if not args:
+        raise ValueError("Not enough args! Use: done <id>")
+
+    try:
+        order_id = int(args[0])
+    except ValueError:
+        print("[ERROR]Failed 'id' Task!")
+        return
+
+    order = find_order(orders, order_id)
+    if not order:
+        print(f"Task {order_id} not found!")
+        return
+
+    new_status = args[1]
+
+    order["status"] = new_status
+
+    print(srtingify_table([order]))

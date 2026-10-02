@@ -1,24 +1,16 @@
+from cli import cli_command
 
 
-from orders import Order, create_order, list_orders
-from storage import save_orders, load_orders
-
-orders: list[Order] = []
-
-order = create_order(
-    1,
-    "Name",
-    3.0,
-    "test@",
-    {"1", "2"},
-    None
-)
+def main():
+    cli_command()
 
 
-orders.append(order)
-list_orders(orders)
+if __name__ == "__main__":
+    main()
 
-save_orders(orders)
-
-order = load_orders()
-print(order)
+# add "Tee" amount=30 email=1@f.ru due=2026-12-12 tags=a,b,c
+# add "Coffee" amount=150 email=2@f.ru due=2026-12-13 tags=a
+# add "Milk" amount=100 email=3@f.ru due=2026-12-14
+# add "Beer" amount=50 email=4@f.ru due=2026-12-15 tags=a,b
+# add "Water" amount=20 email=5@f.ru due=2026-12-16 tags=a,c
+# list
