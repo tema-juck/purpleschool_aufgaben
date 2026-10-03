@@ -40,33 +40,42 @@ def create_order(id_: int, title: str, amount: float, email: str,
 
 
 def list_orders(orders: list[Order], args: list[str]):
-    subset = orders[:]
-    params = parse_list(args)
+    try:
+        subset = orders[:]
+        params = parse_list(args)
 
-    if params["overdue"]:
-        subset = [
-            order
-            for order in subset
-            if order["due"] is not None
-        ]
+        if params["overdue"]:
+            subset = [
+                order
+                for order in subset
+                if order["due"] is not None
+                and order["due"] < date.today()
+            ]
 
-        subset = sorted(subset, key=lambda order: order["due"] or date.max)
+            subset = sorted(
+                subset,
+                key=lambda order: order["due"] or date.max
+            )
 
-    if params["tag"] is not None:
-        subset = [
-            order
-            for order in subset
-            if params["tag"] in order["tags"]
-        ]
+        if params["tag"] is not None:
+            subset = [
+                order
+                for order in subset
+                if order["tags"] is not None
+                and params["tag"] in order["tags"]
+            ]
 
-    if params["limit"] is not None:
-        subset = subset[:params["limit"]]
+        if params["limit"] is not None:
+            subset = subset[:params["limit"]]
 
-    if not subset:
-        print("Список пустой!")
-        return
+        if not subset:
+            print("Список пустой!")
+            return
 
-    print(srtingify_table(subset))
+        print(srtingify_table(subset))
+
+    except ValueError as e:
+        print(f"[ERROR]: {e}")
 
 
 def add_order(orders: list[Order], args: list[str], next_id: int) -> int:

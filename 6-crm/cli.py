@@ -111,19 +111,23 @@ def edit_command(orders: list[orders_.Order], args: list[str]):
 
 def tags_command(orders: list[orders_.Order], args: list[str]):
     try:
-        if len(args) != 6:
+        if len(args) < 2:
             raise ValueError(
-                "Use: tags --id <id> --action add|remove --tag <tag>"
+                "Use: tags --id <id> [--add a,b] [--remove x,y]"
             )
 
         order_id = None
-        action = None
-        tag = None
+        tags_to_add: set[str] = set()
+        tags_to_remove: set[str] = set()
 
         i = 0
 
         while i < len(args):
             flag = args[i]
+
+            if i + 1 >= len(args):
+                raise ValueError(f"No value for {flag}")
+
             value = args[i + 1]
 
             if flag == "--id":
@@ -132,11 +136,19 @@ def tags_command(orders: list[orders_.Order], args: list[str]):
                 except ValueError as e:
                     raise ValueError("ID must be a number") from e
 
-            elif flag == "--action":
-                action = value.lower()
+            elif flag == "--add":
+                tags_to_add.update(
+                    tag.strip().lower()
+                    for tag in value.split(",")
+                    if tag.strip()
+                )
 
-            elif flag == "--tag":
-                tag = value.lower().strip()
+            elif flag == "--remove":
+                tags_to_remove.update(
+                    tag.strip().lower()
+                    for tag in value.split(",")
+                    if tag.strip()
+                )
 
             else:
                 raise ValueError(f"Unknown flag: {flag}")
@@ -146,11 +158,10 @@ def tags_command(orders: list[orders_.Order], args: list[str]):
         if order_id is None:
             raise ValueError("--id is required")
 
-        if action not in {"add", "remove"}:
-            raise ValueError("--action must be add or remove")
-
-        if not tag:
-            raise ValueError("--tag can't be empty")
+        if not tags_to_add and not tags_to_remove:
+            raise ValueError(
+                "Specify at least one of --add or --remove"
+            )
 
         order = orders_.find_order(orders, order_id)
 
@@ -158,15 +169,11 @@ def tags_command(orders: list[orders_.Order], args: list[str]):
             print(f"Order {order_id} not found!")
             return
 
-        if action == "add":
-            if order["tags"] is None:
-                order["tags"] = set()
+        if order["tags"] is None:
+            order["tags"] = set()
 
-            order["tags"].add(tag)
-
-        elif action == "remove":
-            if order["tags"]:
-                order["tags"].discard(tag)
+        order["tags"].update(tags_to_add)
+        order["tags"].difference_update(tags_to_remove)
 
         print(srtingify_table([order]))
 

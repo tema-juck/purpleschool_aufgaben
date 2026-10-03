@@ -103,14 +103,32 @@ def parse_list(args: list[str]) -> dict:
     }
 
     for arg in args:
-        if arg == "overdue":
+        if arg == "--overdue":
             params["overdue"] = True
 
-        elif arg.startswith("tag="):
-            params["tag"] = arg.split("=", 1)[1]
+        elif arg.startswith("--tag="):
+            tag = arg.split("=", 1)[1].strip()
 
-        elif arg.startswith("limit="):
-            params["limit"] = int(arg.split("=", 1)[1])
+            if not tag:
+                raise ValueError("--tag не может быть пустым")
+
+            params["tag"] = tag
+
+        elif arg.startswith("--limit="):
+            value = arg.split("=", 1)[1]
+
+            try:
+                limit = int(value)
+            except ValueError as e:
+                raise ValueError("--limit должен быть числом") from e
+
+            if limit <= 0:
+                raise ValueError("--limit должен быть больше 0")
+
+            params["limit"] = limit
+
+        else:
+            raise ValueError(f"Неизвестный аргумент: {arg}")
 
     return params
 
