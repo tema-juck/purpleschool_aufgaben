@@ -40,33 +40,42 @@ def create_order(id_: int, title: str, amount: float, email: str,
 
 
 def list_orders(orders: list[Order], args: list[str]):
-    subset = orders[:]
-    params = parse_list(args)
+    try:
+        subset = orders[:]
+        params = parse_list(args)
 
-    if params["overdue"]:
-        subset = [
-            order
-            for order in subset
-            if order["due"] is not None
-        ]
+        if params["overdue"]:
+            subset = [
+                order
+                for order in subset
+                if order["due"] is not None
+                and order["due"] < date.today()
+            ]
 
-        subset = sorted(subset, key=lambda order: order["due"] or date.max)
+            subset = sorted(
+                subset,
+                key=lambda order: order["due"] or date.max
+            )
 
-    if params["tag"] is not None:
-        subset = [
-            order
-            for order in subset
-            if params["tag"] in order["tags"]
-        ]
+        if params["tag"] is not None:
+            subset = [
+                order
+                for order in subset
+                if order["tags"] is not None
+                and params["tag"] in order["tags"]
+            ]
 
-    if params["limit"] is not None:
-        subset = subset[:params["limit"]]
+        if params["limit"] is not None:
+            subset = subset[:params["limit"]]
 
-    if not subset:
-        print("Список пустой!")
-        return
+        if not subset:
+            print("Список пустой!")
+            return
 
-    print(srtingify_table(subset))
+        print(srtingify_table(subset))
+
+    except ValueError as e:
+        print(f"[ERROR]: {e}")
 
 
 def add_order(orders: list[Order], args: list[str], next_id: int) -> int:
@@ -97,9 +106,15 @@ def add_order(orders: list[Order], args: list[str], next_id: int) -> int:
         return next_id
 
 
-def remove_order(orders: list[Order], order_id) -> bool:
+def remove_order(orders: list[Order], order_id: int) -> bool:
     before_len = len(orders)
-    orders[:] = list(filter(lambda o: o["id"] != order_id, orders))
+
+    orders[:] = [
+        order
+        for order in orders
+        if order["id"] != order_id
+    ]
+
     return len(orders) < before_len
 
 
@@ -118,8 +133,13 @@ def update_order(order: Order, **changes):
 
     if "email" in changes:
         email = str(changes["email"]).strip()
+
         if not email:
             raise ValueError("Email can't be empty!")
+
+        if not validate_email(email):
+            raise ValueError("Invalid email!")
+
         order["email"] = email
 
     if "due" in changes:
@@ -134,22 +154,50 @@ def find_order(orders: list[Order], id_: int) -> Optional[Order]:
 
 
 def change_status(orders: list[Order], args: list[str]):
-    if not args:
-        raise ValueError("Not enough args! Use: done <id>")
-
     try:
-        order_id = int(args[0])
-    except ValueError:
-        print("[ERROR]Failed 'id' Task!")
-        return
+        if len(args) != 4:
+            raise ValueError(
+                "Используйте: status --id <id> --status <status>"
+            )
 
-    order = find_order(orders, order_id)
-    if not order:
-        print(f"Task {order_id} not found!")
-        return
+        order_id = None
+        new_status = None
 
-    new_status = args[1]
+        i = 0
 
-    order["status"] = new_status
+        while i < len(args):
+            flag = args[i]
+            value = args[i + 1]
 
-    print(srtingify_table([order]))
+            if flag == "--id":
+                try:
+                    order_id = int(value)
+                except ValueError as e:
+                    raise ValueError("ID должно быть числом") from e
+
+            elif flag == "--status":
+                new_status = value
+
+            else:
+                raise ValueError(f"Неизвестный флаг: {flag}")
+
+            i += 2
+
+        if order_id is None:
+            raise ValueError("Не указан --id")
+
+        if new_status is None:
+            raise ValueError("Не указан --status")
+
+        order = find_order(orders, order_id)
+
+        if order is None:
+            print(f"Task {order_id} not found!")
+            return
+
+        order["status"] = new_status
+
+        print(srtingify_table([order]))
+
+    except ValueError as e:
+        print(f"[ERROR]: {e}")

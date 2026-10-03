@@ -7,12 +7,12 @@
       "email": "1@f.ru",
       "status": "new",
       "tags": [
+        "a",
         "b",
-        "c",
-        "a"
+        "c"
       ],
       "created_at": "2026-10-03T00:08:06.969276",
-      "due": "2026-12-12",
+      "due": "2025-12-12",
       "closed_at": null
     },
     {
@@ -48,25 +48,11 @@
       "email": "4@f.ru",
       "status": "new",
       "tags": [
-        "b",
-        "a"
+        "a",
+        "b"
       ],
       "created_at": "2026-10-03T00:13:46.841424",
       "due": "2026-12-15",
-      "closed_at": null
-    },
-    {
-      "id": 5,
-      "title": "Water",
-      "amount": 20.0,
-      "email": "5@f.ru",
-      "status": "done",
-      "tags": [
-        "c",
-        "a"
-      ],
-      "created_at": "2026-10-03T01:33:14.067801",
-      "due": "2026-12-16",
       "closed_at": null
     }
   ]

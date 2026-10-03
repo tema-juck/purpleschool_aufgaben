@@ -6,6 +6,7 @@ from shlex import split
 import orders as orders_
 from storage import load_orders, save_orders
 from utils.validators import parse_edit
+from utils.table import srtingify_table
 
 
 def cli_command():
@@ -26,7 +27,6 @@ def cli_command():
                     next_id = add_command(orders, args, next_id)
                 case "remove":
                     remove_command(orders, args)
-                    next_id -= 1
                 case "edit":
                     edit_command(orders, args)
                 case "tags":
@@ -72,59 +72,113 @@ def add_command(orders: list[orders_.Order], args: list[str], next_id: int) -> i
 
 
 def remove_command(orders: list[orders_.Order], args: list[str]):
-    order_id = None
     try:
-        order_id = int(args[0])
+        if len(args) != 2:
+            raise ValueError("Используйте: remove --id <число>")
+
+        if args[0] != "--id":
+            raise ValueError(f"Неизвестный флаг: {args[0]}")
+
+        order_id = int(args[1])
+
         if orders_.remove_order(orders, order_id):
             print(f"Успех! Товар {order_id} удален!")
         else:
-            print(f"Неудача! Товар {order_id} не удален!")
+            print(f"Неудача! Товар {order_id} не найден!")
+
     except ValueError as e:
-        print(f"[ERROR]: ID должно быть числом: {e}")
+        print(f"[ERROR]: {e}")
 
 
 def edit_command(orders: list[orders_.Order], args: list[str]):
-    order_id, changes = parse_edit(args)
-    order = orders_.find_order(orders, order_id)
-    if order is None:
-        print("Товар не найден!")
-        return
-    orders_.update_order(order, **changes)
+    try:
+        order_id, changes = parse_edit(args)
+
+        order = orders_.find_order(orders, order_id)
+
+        if order is None:
+            print("Товар не найден!")
+            return
+
+        orders_.update_order(order, **changes)
+
+        print("Товар обновлён!")
+        print(srtingify_table([order]))
+
+    except (ValueError, TypeError) as e:
+        print(f"[ERROR]: {e}")
 
 
 def tags_command(orders: list[orders_.Order], args: list[str]):
-    if len(args) < 3:
-        raise ValueError("Not enough args! Use: tags <id> add|remove <tag>")
-
     try:
-        order_id = int(args[0])
-    except ValueError:
-        print("[ERROR]Failed 'id' Task!")
-        return
+        if len(args) < 2:
+            raise ValueError(
+                "Use: tags --id <id> [--add a,b] [--remove x,y]"
+            )
 
-    action = args[1].lower()
-    tag = args[2].lower().strip()
+        order_id = None
+        tags_to_add: set[str] = set()
+        tags_to_remove: set[str] = set()
 
-    order = orders_.find_order(orders, order_id)
-    if not order:
-        print(f"Order {order_id} not found!")
-        return
+        i = 0
 
-    if action == "add":
-        if not order["tags"]:
-            order["tags"] = {tag}
+        while i < len(args):
+            flag = args[i]
+
+            if i + 1 >= len(args):
+                raise ValueError(f"No value for {flag}")
+
+            value = args[i + 1]
+
+            if flag == "--id":
+                try:
+                    order_id = int(value)
+                except ValueError as e:
+                    raise ValueError("ID must be a number") from e
+
+            elif flag == "--add":
+                tags_to_add.update(
+                    tag.strip().lower()
+                    for tag in value.split(",")
+                    if tag.strip()
+                )
+
+            elif flag == "--remove":
+                tags_to_remove.update(
+                    tag.strip().lower()
+                    for tag in value.split(",")
+                    if tag.strip()
+                )
+
+            else:
+                raise ValueError(f"Unknown flag: {flag}")
+
+            i += 2
+
+        if order_id is None:
+            raise ValueError("--id is required")
+
+        if not tags_to_add and not tags_to_remove:
+            raise ValueError(
+                "Specify at least one of --add or --remove"
+            )
+
+        order = orders_.find_order(orders, order_id)
+
+        if order is None:
+            print(f"Order {order_id} not found!")
             return
-        if tag not in order["tags"]:
-            order["tags"].add(tag)
-            return
 
-    if action == "remove":
-        if not order["tags"]:
-            return
-        try:
-            order["tags"].remove(tag)
-        except ValueError:
-            pass
+        if order["tags"] is None:
+            order["tags"] = set()
+
+        order["tags"].update(tags_to_add)
+        order["tags"].difference_update(tags_to_remove)
+
+        print(srtingify_table([order]))
+
+    except ValueError as e:
+        print(f"[ERROR]: {e}")
 
 
 def status_command(orders: list[orders_.Order], args: list[str]):
